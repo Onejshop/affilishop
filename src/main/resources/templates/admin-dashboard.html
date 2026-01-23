@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Admin - AffiliShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4">
+    <span class="navbar-brand">AffiliShop Admin</span>
+    <a href="#addProductForm" class="btn btn-outline-light btn-sm">Ajouter produit</a>
+    <a href="#userSection" class="btn btn-outline-light btn-sm">Gérer utilisateurs</a>
+    <form th:action="@{/logout}" method="post" style="display:inline; margin-left:10px;">
+        <button type="submit" class="btn btn-outline-light btn-sm">Déconnexion</button>
+    </form>
+</nav>
+
+<div class="container mt-4">
+
+    <!-- Messages flash -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- ================= STATS PRODUITS ================= -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-bg-primary shadow">
+                <div class="card-body">
+                    <h5>Total Produits</h5>
+                    <h2 th:text="${totalProducts}">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-bg-success shadow">
+                <div class="card-body">
+                    <h5>Prix Moyen</h5>
+                    <h2>$<span th:text="${averagePrice}">0</span></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= GRAPH STATISTIQUES ================= -->
+    <div class="card shadow mb-4 p-3">
+        <h5>Statistiques générales</h5>
+        <!-- ✅ Passe les valeurs dans data-* -->
+        <div id="statsData"
+             th:data-clicks="${totalClicks}"
+             th:data-signups="${totalSignups}"
+             th:data-revenue="${totalRevenue}"></div>
+        <canvas id="statsChart" height="100"></canvas>
+    </div>
+
+    <!-- ================= TABLE PRODUITS ================= -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white fw-bold">Produits affiliés</div>
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Source</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${products}">
+                <td th:text="${p.name}"></td>
+                <td>$<span th:text="${p.price}"></span></td>
+                <td th:text="${p.source}"></td>
+                <td th:text="${p.description}"></td>
+                <td>
+                    <img th:src="@{${p.imageUrl}}" alt="Image produit"
+                         style="width:80px;height:80px;object-fit:cover;">
+                </td>
+                <td>
+                    <a th:href="@{${p.affiliateLink}}" target="_blank"
+                       class="btn btn-sm btn-primary">Voir</a>
+                    <form th:action="@{/admin/delete-product}" method="post" style="display:inline; margin-left:6px;">
+                        <input type="hidden" name="id" th:value="${p.id}">
+                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ================= FORMULAIRE AJOUT PRODUIT ================= -->
+    <div class="card shadow mb-4 p-3" id="addProductForm">
+        <h5>Ajouter un produit affilié</h5>
+        <form th:action="@{/admin/add}" th:object="${product}" method="post"
+              enctype="multipart/form-data" class="row g-2">
+            <!-- champs produit -->
+            <div class="col-md-3">
+                <input type="text" th:field="*{name}" class="form-control" placeholder="Nom" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" th:field="*{price}" class="form-control" placeholder="Prix $" step="0.01" required>
+            </div>
+            <div class="col-md-3">
+                <input type="text" th:field="*{source}" class="form-control" placeholder="Source">
+            </div>
+            <div class="col-md-4">
+                <input type="text" th:field="*{affiliateLink}" class="form-control" placeholder="Lien">
+            </div>
+            <div class="col-md-6 mt-2">
+                <input type="file" name="imageFile" class="form-control" accept="image/*" required>
+            </div>
+            <div class="col-md-6 mt-2">
+                <textarea th:field="*{description}" class="form-control" rows="2"
+                          placeholder="Description du produit" maxlength="250" required id="descriptionField"></textarea>
+                <small id="descCount" class="form-text text-muted">250 caractères restants</small>
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-success w-100">Ajouter Produit</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ================= SECTION UTILISATEURS ================= -->
+    <div class="card shadow mb-4 p-3" id="userSection">
+        <h5>Utilisateurs inscrits</h5>
+        <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.username}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.role}"></td>
+                <td>
+                    <form th:action="@{/admin/send-email}" method="post" style="display:inline;">
+                        <input type="hidden" name="email" th:value="${u.email}">
+                        <button type="submit" class="btn btn-sm btn-primary">Envoyer message</button>
+                    </form>
+                    <form th:action="@{/admin/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${u.id}">
+                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // compteur de caractères pour la description
+    (function(){
+        var textarea = document.getElementById('descriptionField');
+        var counter = document.getElementById('descCount');
+        if(!textarea) return;
+        var max = parseInt(textarea.getAttribute('maxlength')) || 250;
+        function update(){
+            var remaining = max - textarea.value.length;
+            counter.textContent = remaining + ' caractères restants';
+        }
+        textarea.addEventListener('input', update);
+        update();
+    })();
+
+    // ✅ Récupère les valeurs depuis data-* attributes
+    const statsDiv = document.getElementById('statsData');
+    const clicks = parseInt(statsDiv.dataset.clicks);
+    const signups = parseInt(statsDiv.dataset.signups);
+    const revenue = parseFloat(statsDiv.dataset.revenue);
+
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    const statsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Clics', 'Inscriptions', 'Revenus'],
+            datasets: [{
+                label: 'Statistiques AffiliShop',
+                data: [clicks, signups, revenue],
+                backgroundColor: ['#007bff', '#28a745', '#ffc107']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Performance globale' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

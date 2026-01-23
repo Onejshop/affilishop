@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter un produit | AffiliShop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-4 text-center">Ajouter un produit</h3>
+
+                <!-- Message erreur -->
+                <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
+
+                <!-- Message succès -->
+                <div th:if="${success}" class="alert alert-success text-center" th:text="${success}"></div>
+
+                <!-- Formulaire -->
+                <form th:action="@{/products/add}" method="post">
+
+                    <!-- Nom du produit -->
+                    <div class="mb-3">
+                        <label class="form-label">Nom du produit</label>
+                        <input type="text" name="name" class="form-control" placeholder="Nom du produit" required>
+                    </div>
+
+                    <!-- Prix -->
+                    <div class="mb-3">
+                        <label class="form-label">Prix ($)</label>
+                        <input type="number" step="0.01" name="price" class="form-control" placeholder="Prix en dollars" required>
+                    </div>
+
+                    <!-- ✅ Image du produit -->
+                    <div class="mb-3">
+                        <label class="form-label">Image du produit (URL)</label>
+                        <input type="text" name="imageUrl" class="form-control" placeholder="Lien vers l'image du produit" required>
+                    </div>
+
+                    <!-- Lien affilié -->
+                    <div class="mb-3">
+                        <label class="form-label">Lien affilié</label>
+                        <input type="text" name="affiliateLink" class="form-control" placeholder="Lien d'affiliation" required>
+                    </div>
+
+                    <!-- Description du produit -->
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Décrivez le produit..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Ajouter</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

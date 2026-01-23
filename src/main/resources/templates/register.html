@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un compte | AffiliShop</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            min-height: 100vh;
+        }
+        .card {
+            border-radius: 20px;
+            animation: fadeInUp 0.8s ease;
+        }
+        .form-control {
+            border-radius: 12px;
+        }
+        .btn-primary {
+            border-radius: 12px;
+            font-weight: 500;
+            background-color: #0d6efd;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .brand {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="card shadow-lg p-4">
+
+                <!-- Logo / Nom -->
+                <div class="text-center mb-4">
+                    <img src="/images/logo.png" alt="AffiliShop Logo" width="80" class="mb-2">
+                    <h3 class="brand">AffiliShop</h3>
+                    <p class="text-muted">Créer un compte utilisateur</p>
+                </div>
+
+                <!-- Message erreur -->
+                <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
+
+                <!-- Message succès -->
+                <div th:if="${success}" class="alert alert-success text-center" th:text="${success}"></div>
+
+                <!-- Formulaire inscription -->
+                <form th:action="@{/register}" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nom d'utilisateur</label>
+                        <input type="text" name="username" class="form-control"
+                               placeholder="ex: obed123" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email (Gmail)</label>
+                        <input type="email" name="email" class="form-control"
+                               placeholder="ex: votre@gmail.com" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" name="password" class="form-control"
+                               placeholder="••••••••" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" name="confirmPassword" class="form-control"
+                               placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-2">
+                        <i class="bi bi-person-plus"></i> Créer mon compte
+                    </button>
+                </form>
+
+                <hr>
+
+                <!-- Lien vers login -->
+                <div class="text-center">
+                    <span class="text-muted">Déjà inscrit ?</span><br>
+                    <a th:href="@{/login}" class="text-decoration-none fw-semibold">
+                        <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                    </a>
+                </div>
+
+                <!-- Conditions -->
+                <p class="text-muted mt-3 text-center">
+                    En créant un compte, vous acceptez nos 
+                    <a href="/terms" class="text-decoration-none">conditions d’utilisation</a>.
+                </p>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
