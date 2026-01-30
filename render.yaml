@@ -8,3 +8,11 @@ services:
     envVars:
       - key: PORT
         value: 8080
+
+envVars:
+  - key: SPRING_DATASOURCE_URL
+    value: jdbc:mysql://<host>:<port>/<dbname>?useSSL=false&serverTimezone=UTC
+  - key: SPRING_DATASOURCE_USERNAME
+    value: <username>
+  - key: SPRING_DATASOURCE_PASSWORD
+    value: <password>
