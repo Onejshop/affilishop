@@ -2,63 +2,62 @@ package com.obed.affilishop.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.obed.affilishop.service.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+import com.obed.affilishop.service.CustomUserDetailsService;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    // 🔑 Bean PasswordEncoder (obligatoire pour injection)
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+        this.customUserDetailsService = customUserDetailsService;
+    }
+
+    // Bean pou encode modpas yo
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // 🔐 AuthenticationProvider avec PasswordEncoder
-   @Bean
-public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
-    provider.setPasswordEncoder(passwordEncoder());
-    return provider;
-}
-    // 🔐 Sécurité des URL
+    // Bean pou AuthenticationProvider ki itilize CustomUserDetailsService
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
 
+    // Bean pou AuthenticationManager (obligatwa nan Spring Security 6)
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    // Konfigirasyon prensipal pou sekirite
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/**").hasRole("ADMIN") // accès admin restreint
-                .requestMatchers("/cart").authenticated() // accès panier pour utilisateurs authentifiés
-                .anyRequest().permitAll() // le reste est public
+                .requestMatchers("/", "/register", "/css/**", "/js/**").permitAll()
+                .anyRequest().authenticated()
             )
-            .authenticationProvider(authenticationProvider()) // utiliser le provider avec PasswordEncoder
             .formLogin(form -> form
-                .loginPage("/login") // page de login personnalisée
-                .successHandler((request, response, authentication) -> {
-                    // Redirection selon le rôle
-                    if (authentication.getAuthorities().stream()
-                            .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
-                        response.sendRedirect("/admin/dashboard");
-                    } else {
-                        response.sendRedirect("/");
-                    }
-                })
+                .loginPage("/login")
                 .permitAll()
             )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-            );
+            .logout(logout -> logout.permitAll());
 
         return http.build();
     }
